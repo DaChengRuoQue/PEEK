@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peek-diffusion"
+version = "0.1.0"
+description = "PEEK one-step-look-ahead exposure-bias correction for diffusion sampling"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "Yunwei Bai"},
+  {name = "Ying Kiat Tan"},
+  {name = "Tsuhan Chen"},
+]
+dependencies = []
+
+[project.optional-dependencies]
+diffusers = [
+  "diffusers>=0.30",
+  "Pillow",
+  "torch",
+]
+
+[tool.setuptools.packages.find]
+include = ["peek*"]

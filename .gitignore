@@ -1,0 +1,43 @@
+# Host-managed and local repository metadata
+.agents/
+.aws/
+.codex/
+.git-data/
+.superpowers/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local configuration and credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Models, data, and generated artifacts
+data/
+datasets/
+checkpoints/
+pretrained/
+runs/
+outputs/
+results/
+samples/
+cache/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.npz
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
