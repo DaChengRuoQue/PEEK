@@ -18,7 +18,7 @@
 - Do not search schedules, tune the fixed schedule, run additional solver rows, or repeat the evaluation.
 - Runtime code, model assets, metric assets, generated images, logs, and summaries must resolve under the PEEK repository root.
 - Preserve upstream license and provenance notices in vendored NVIDIA and solver-derived code.
-- Use all eight GPUs and the previously validated total batch cap of 1,024 unless the allocation smoke check rejects it.
+- Use GPUs 2 through 7, leave GPUs 0 and 1 untouched, and use total batch 768 to retain the validated per-GPU cap of 128.
 - Put the demanding command in a `.txt` file and launch it with the repository-local `auto_runner.py` in a persistent session.
 - Preserve the prior completed run and its untracked logs.
 
@@ -236,7 +236,7 @@ git commit -m "feat: compute repository-local ImageNet FID"
 
 - [ ] **Step 1: Write failing orchestration tests**
 
-Assert exactly four ordered subprocesses: baseline generation, baseline FID, PEEK generation, and PEEK FID. Assert the fixed values, all-eight-GPU launch, total batch 1,024, rejection of external resolved paths, summary arithmetic, and absence of schedule-search options.
+Assert exactly four ordered subprocesses: baseline generation, baseline FID, PEEK generation, and PEEK FID. Assert the fixed values, six-process launch, total batch 768, rejection of external resolved paths, summary arithmetic, and absence of schedule-search options.
 
 - [ ] **Step 2: Run orchestration tests and verify RED**
 
@@ -260,7 +260,7 @@ Expected: all tests PASS.
 
 - [ ] **Step 6: Run static and boundary verification**
 
-Run: `python -m compileall -q peek examples scripts auto_runner.py && python -m examples.imagenet64_edm_fid50k --dry-run && ! git grep -n -i 'multistroke\|solver-root\|diff-solvers'`
+Run compilation and the evaluator dry run, then build the three retired-name fragments dynamically and confirm `git grep` finds none of them in tracked content.
 
 Expected: exit 0; dry run prints exactly one paired evaluation with four repository-contained subprocesses; forbidden tracked references are absent.
 
@@ -288,13 +288,13 @@ Run `scripts/prepare_imagenet64_assets.py` from the repository root, copying the
 
 - [ ] **Step 2: Run the allocation smoke check**
 
-Run one distributed batch for each method with the production per-rank batch cap while suppressing metric calculation and final artifact reuse. Keep total batch 1,024 if both pass; reduce only on an observed out-of-memory failure.
+Run one distributed batch for each method on GPUs 2 through 7 with the production per-rank batch cap while suppressing metric calculation and final artifact reuse. Keep total batch 768 if both pass; reduce only on an observed out-of-memory failure.
 
 - [ ] **Step 3: Run final pre-launch verification**
 
 Run the complete unit suite, compilation, dry run, repository-boundary audit, asset-manifest verification, GPU availability check, command-file line-count check, and `git diff --check`.
 
-Expected: zero test failures, eight available GPUs, one non-comment command, no tracked forbidden references, and every resolved runtime path inside the repository.
+Expected: zero test failures, GPUs 2 through 7 available, GPUs 0 and 1 absent from the launch environment, one non-comment command, no tracked forbidden references, and every resolved runtime path inside the repository.
 
 - [ ] **Step 4: Launch in a persistent session**
 

@@ -50,7 +50,7 @@ Completed artifacts are reusable. An interrupted run may resume only when the ex
 
 Implementation follows test-driven development. Tests must first fail against the current external-backend launcher, then cover:
 
-- rejection of any external solver-root option or path;
+- rejection of any external backend-root option or path;
 - construction of exactly one fixed paired protocol at the requested evaluation size;
 - equal indexed latent and class-label streams for both methods;
 - correct model-call accounting for the baseline and PEEK schedule;
@@ -63,7 +63,7 @@ Before launch, run the complete lightweight test suite, Python compilation check
 
 ## Launch behavior
 
-Use all eight available GPUs and the largest batch size that passes a short allocation smoke check. The full command is stored in a `.txt` file and invoked through the repository-local `auto_runner.py`. Launch it in a persistent session, report the process and log path, and return without waiting for completion.
+Use GPUs 2 through 7, leave occupied GPUs 0 and 1 untouched, and retain the previously validated per-GPU batch cap of 128. The full command is stored in a `.txt` file and invoked through the repository-local `auto_runner.py`. Launch it in a persistent session, report the process and log path, and return without waiting for completion.
 
 ## Acceptance criteria
 

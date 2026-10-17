@@ -1,1 +1,0 @@
-cd /home/yunwei/MultiStroke/PEEK && CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 PYTORCH_ALLOC_CONF=expandable_segments:True python -m examples.imagenet64_edm_fid5k --solver-root /home/yunwei/MultiStroke/solvers/diff-solvers-main --outdir /home/yunwei/MultiStroke/PEEK/runs/imagenet64_peek_fid5k --num-images 5000 --nproc 8 --batch 1024

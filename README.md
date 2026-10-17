@@ -76,18 +76,28 @@ This command is intentionally not part of the lightweight test suite because it 
 
 ## ImageNet-64 EDM paired FID evaluation
 
-`examples.imagenet64_edm_fid5k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses conditional ImageNet-64 EDM, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. It does not run schedule search or repeated evaluations.
+`examples.imagenet64_edm_fid50k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses conditional ImageNet-64 EDM, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. It does not run schedule search or repeated evaluations. Sampling, metric calculation, and orchestration are implemented inside this repository.
 
-The checked-in command file uses the local paper backend and all eight configured GPUs:
+Prepare the pinned NVIDIA model and metric assets under the ignored
+`checkpoints/imagenet64/` directory. A local checkpoint can be supplied to
+avoid downloading it again:
 
 ```bash
-python /home/yunwei/MultiStroke/auto_runner.py \
-  --commands /home/yunwei/MultiStroke/PEEK/commands_imagenet64_peek_fid5k.txt \
-  --log_dir /home/yunwei/MultiStroke/PEEK/runner_logs_imagenet64_peek_fid5k \
+python scripts/prepare_imagenet64_assets.py --checkpoint-source /path/to/edm-imagenet-64x64-cond-adm.pkl
+```
+
+Launch the checked-in command from the repository root. It uses GPUs 2 through
+7, leaving occupied GPUs 0 and 1 untouched, and writes a visible timestamped
+log immediately:
+
+```bash
+python auto_runner.py \
+  --commands commands_imagenet64_peek_fid50k.txt \
+  --log_dir runner_logs_imagenet64_peek_fid50k \
   --stop_on_error
 ```
 
-After completion, the paired FIDs and relative reduction are written to `runs/imagenet64_peek_fid5k/reproduction_summary.json`. The manuscript's full evaluation reports a 49.3 percent relative reduction; this lower-cost run is intended only as a rough single-run reproduction.
+After completion, the paired FIDs and relative reduction are written to `runs/imagenet64_edm_fid50k/reproduction_summary.json`. The manuscript reports a 49.3 percent relative reduction for this protocol.
 
 ## Schedule search and caches
 

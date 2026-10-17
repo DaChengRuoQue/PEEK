@@ -45,7 +45,7 @@ class GenerationConfig:
     repo_root: Path
     method: Method
     num_images: int = 50_000
-    total_batch: int = 1_024
+    total_batch: int = 768
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "repo_root", self.repo_root.resolve())
@@ -245,7 +245,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--method", choices=("baseline", "peek"), required=True)
     parser.add_argument("--num-images", type=int, default=50_000)
-    parser.add_argument("--batch", type=int, default=1_024)
+    parser.add_argument("--batch", type=int, default=768)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     args = parser.parse_args()
     rank, world_size, device = _init_distributed()
