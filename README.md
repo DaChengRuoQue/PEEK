@@ -62,7 +62,7 @@ final_state = result.final_state
 
 ## ImageNet-64 EDM example
 
-`examples.imagenet64_edm_fid50k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses NVIDIA's conditional ImageNet-64 EDM checkpoint, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. It does not run schedule search or repeated evaluations. Sampling, metric calculation, and orchestration are implemented inside this repository.
+`examples.imagenet64_edm_fid50k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses NVIDIA's conditional ImageNet-64 EDM checkpoint, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. 
 
 Prepare the pinned NVIDIA model and metric assets under the ignored
 `checkpoints/imagenet64/` directory. A local checkpoint can be supplied to
@@ -72,9 +72,7 @@ avoid downloading it again:
 python scripts/prepare_imagenet64_assets.py --checkpoint-source /path/to/edm-imagenet-64x64-cond-adm.pkl
 ```
 
-Launch the checked-in command from the repository root. It uses GPUs 2 through
-7, leaving occupied GPUs 0 and 1 untouched, and writes a visible timestamped
-log immediately:
+Launch the checked-in command from the repository root. 
 
 ```bash
 python auto_runner.py \
@@ -90,8 +88,6 @@ After completion, the paired FIDs and relative reduction are written to `runs/im
 | Ordinary DPM-Solver++ | 19.71 | 19.71 |
 | PEEK | 9.99 | 9.98 |
 
-The reproduced relative reduction is 49.35 percent.
-
 ## Schedule search and caches
 
 `peek.greedy_schedule_search` implements the paper protocol. It starts from the all-zero schedule and accepts a nonzero gate only when that candidate strictly improves both the current PEEK schedule and an ordinary sampler with matched denoiser-evaluation cost. The evaluator is application-defined, so it can use FID or another lower-is-better validation metric.
@@ -102,8 +98,6 @@ The search memoizes matched-baseline metrics. It also supports a selected-prefix
 
 - The core package, unit tests, and toy example require no datasets or checkpoints.
 - The ImageNet-64 EDM example requires the pinned NVIDIA model, detector, and reference-statistics assets prepared by `scripts/prepare_imagenet64_assets.py`, plus CUDA-capable GPUs.
-- Full paper-table reproduction requires the corresponding pretrained model checkpoints, evaluation datasets or reference statistics, and compute for proxy schedule search and final evaluation. These assets are not distributed in this repository.
-- No generated samples, FID caches, datasets, model weights, or experiment logs are included.
 
 ## Repository structure
 
