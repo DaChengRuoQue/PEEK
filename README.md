@@ -83,10 +83,10 @@ python auto_runner.py \
 
 After completion, the paired FIDs and relative reduction are written to `runs/imagenet64_edm_fid50k/reproduction_summary.json`. The manuscript reports a 49.3 percent relative reduction for this protocol.
 
-| Method | Manuscript FID | Reproduced FID |
-| --- | ---: | ---: |
-| Ordinary DPM-Solver++ | 19.71 | 19.71 |
-| PEEK | 9.99 | 9.98 |
+| Method | Reproduced FID |
+| --- | ---: |
+| Ordinary DPM-Solver++ | 19.71 |
+| PEEK | 9.98 |
 
 ## Schedule search and caches
 
