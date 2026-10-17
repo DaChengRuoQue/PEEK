@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,6 +18,19 @@ from peek.imagenet64.assets import (
 
 
 class Imagenet64AssetTests(unittest.TestCase):
+    def test_preparation_script_runs_directly_from_repository_root(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+
+        result = subprocess.run(
+            [sys.executable, "scripts/prepare_imagenet64_assets.py", "--help"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--checkpoint-source", result.stdout)
+
     def test_sha256_file_matches_known_literal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "fixture.bin"
