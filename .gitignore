@@ -31,6 +31,7 @@ outputs/
 results/
 samples/
 cache/
+runner_logs*/
 *.ckpt
 *.pt
 *.pth
