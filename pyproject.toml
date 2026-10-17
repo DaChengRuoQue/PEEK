@@ -16,11 +16,6 @@ authors = [
 dependencies = []
 
 [project.optional-dependencies]
-diffusers = [
-  "diffusers>=0.30",
-  "Pillow",
-  "torch",
-]
 imagenet = [
   "numpy",
   "Pillow",
