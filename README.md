@@ -16,10 +16,10 @@ source .venv/bin/activate
 python -m pip install -e .
 ```
 
-For the optional Diffusers example:
+For the ImageNet-64 EDM example:
 
 ```bash
-python -m pip install -e ".[diffusers]"
+python -m pip install -e ".[imagenet]"
 ```
 
 ## Minimal runnable usage
@@ -58,21 +58,39 @@ result = sample(
 final_state = result.final_state
 ```
 
-`backend` implements model prediction, scheduler stepping, clean-prediction conversion, and scheduler snapshot and restore. See `examples/toy.py` for the complete interface and `peek/diffusers.py` for a model-backed adapter.
+`backend` implements model prediction, scheduler stepping, clean-prediction conversion, and scheduler snapshot and restore. See `examples/toy.py` for the complete interface. The repository's model-backed sampler is implemented in `peek/imagenet64/sampler.py`.
 
-## Diffusers example
+## ImageNet-64 EDM example
 
-The following command downloads an epsilon-prediction CIFAR-10 checkpoint and writes one image. It uses a first-order deterministic DPM-Solver++ scheduler, matching the backend assumptions in the example.
+`examples.imagenet64_edm_fid50k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses NVIDIA's conditional ImageNet-64 EDM checkpoint, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. It does not run schedule search or repeated evaluations. Sampling, metric calculation, and orchestration are implemented inside this repository.
+
+Prepare the pinned NVIDIA model and metric assets under the ignored
+`checkpoints/imagenet64/` directory. A local checkpoint can be supplied to
+avoid downloading it again:
 
 ```bash
-python -m examples.diffusers_cifar10 \
-  --model-id google/ddpm-cifar10-32 \
-  --steps 9 \
-  --schedule 1,1,1,1,1,1,1,1 \
-  --output peek_cifar10.png
+python scripts/prepare_imagenet64_assets.py --checkpoint-source /path/to/edm-imagenet-64x64-cond-adm.pkl
 ```
 
-This command is intentionally not part of the lightweight test suite because it downloads a checkpoint and performs GPU inference.
+Launch the checked-in command from the repository root. It uses GPUs 2 through
+7, leaving occupied GPUs 0 and 1 untouched, and writes a visible timestamped
+log immediately:
+
+```bash
+python auto_runner.py \
+  --commands commands_imagenet64_peek_fid50k.txt \
+  --log_dir runner_logs_imagenet64_peek_fid50k \
+  --stop_on_error
+```
+
+After completion, the paired FIDs and relative reduction are written to `runs/imagenet64_edm_fid50k/reproduction_summary.json`. The manuscript reports a 49.3 percent relative reduction for this protocol.
+
+| Method | Manuscript FID | Reproduced FID |
+| --- | ---: | ---: |
+| Ordinary DPM-Solver++ | 19.71 | 19.71 |
+| PEEK | 9.99 | 9.98 |
+
+The reproduced relative reduction is 49.35 percent.
 
 ## Schedule search and caches
 
@@ -83,7 +101,7 @@ The search memoizes matched-baseline metrics. It also supports a selected-prefix
 ## Data and checkpoint prerequisites
 
 - The core package, unit tests, and toy example require no datasets or checkpoints.
-- The Diffusers example requires network access on first use, the `google/ddpm-cifar10-32` checkpoint or an equivalent local epsilon-prediction checkpoint, and enough accelerator memory for that model. Use `--device cpu` only for a slow functional run.
+- The ImageNet-64 EDM example requires the pinned NVIDIA model, detector, and reference-statistics assets prepared by `scripts/prepare_imagenet64_assets.py`, plus CUDA-capable GPUs.
 - Full paper-table reproduction requires the corresponding pretrained model checkpoints, evaluation datasets or reference statistics, and compute for proxy schedule search and final evaluation. These assets are not distributed in this repository.
 - No generated samples, FID caches, datasets, model weights, or experiment logs are included.
 
@@ -94,22 +112,22 @@ peek/
   core.py        PEEK and PEEK-G correction loop and backend protocol
   search.py      greedy compute-matched interpolation-schedule search
   cache.py       first-order baseline cache rebasing
-  diffusers.py   optional epsilon-prediction Diffusers adapter
+  imagenet64/    conditional EDM sampling and FID evaluation
 examples/
-  toy.py                  dependency-free smoke example
-  diffusers_cifar10.py    checkpoint-backed sampling example
-tests/                    deterministic lightweight unit tests
+  toy.py                       dependency-free smoke example
+  imagenet64_edm_fid50k.py    checkpoint-backed paired evaluation
+scripts/
+  prepare_imagenet64_assets.py    pinned asset preparation
+tests/                         deterministic lightweight unit tests
 ```
 
-## Validation
+## Vendored NVIDIA utilities
 
-Run the lightweight suite with:
-
-```bash
-python -m unittest discover -v
-python -m compileall -q peek examples tests
-python -m examples.toy
-```
+The repository-local ImageNet evaluator includes the minimal `dnnlib` and
+`torch_utils` modules needed to load NVIDIA EDM and StyleGAN metric pickles.
+These files originate from [NVLabs EDM](https://github.com/NVlabs/edm) and
+retain NVIDIA's Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+copyright and license notices.
 
 ## Citation
 

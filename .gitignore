@@ -31,11 +31,13 @@ outputs/
 results/
 samples/
 cache/
+runner_logs*/
 *.ckpt
 *.pt
 *.pth
 *.safetensors
 *.npz
+*.part
 
 # Editor and operating-system files
 .DS_Store

@@ -1,9 +1,8 @@
 """Greedy interpolation-schedule search for PEEK.
 
-The protocol follows the solver-native search in MultiStroke: each nonzero
-candidate must strictly improve both the current schedule and an ordinary
-sampler with matched denoiser-evaluation cost. Baseline metrics and optional
-selected-prefix states are reused across gates.
+Each nonzero candidate must strictly improve both the current schedule and an
+ordinary sampler with matched denoiser-evaluation cost. Baseline metrics and
+optional selected-prefix states are reused across gates.
 """
 
 from __future__ import annotations

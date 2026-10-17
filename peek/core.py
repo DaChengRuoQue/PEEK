@@ -1,9 +1,7 @@
 """Framework-neutral PEEK and PEEK-G sampling primitives.
 
-This module distills the correction loop from MultiStroke's tracked
-``scripts/sample_celeba_restart.py`` implementation. Model and scheduler
-details stay behind :class:`PeekBackend`, which also makes scheduler-state
-rollback explicit for the provisional look-ahead step.
+Model and scheduler details stay behind :class:`PeekBackend`, which also
+makes scheduler-state rollback explicit for the provisional look-ahead step.
 """
 
 from __future__ import annotations

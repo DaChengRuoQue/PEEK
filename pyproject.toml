@@ -16,11 +16,12 @@ authors = [
 dependencies = []
 
 [project.optional-dependencies]
-diffusers = [
-  "diffusers>=0.30",
+imagenet = [
+  "numpy",
   "Pillow",
+  "scipy",
   "torch",
 ]
 
 [tool.setuptools.packages.find]
-include = ["peek*"]
+include = ["peek*", "dnnlib*", "torch_utils*"]
