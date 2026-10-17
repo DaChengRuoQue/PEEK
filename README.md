@@ -74,6 +74,21 @@ python -m examples.diffusers_cifar10 \
 
 This command is intentionally not part of the lightweight test suite because it downloads a checkpoint and performs GPU inference.
 
+## ImageNet-64 EDM paired FID evaluation
+
+`examples.imagenet64_edm_fid5k.py` launches one paired comparison for the manuscript's largest reported FID reduction. It uses conditional ImageNet-64 EDM, first-order DPM-Solver++, a 9-evaluation ordinary baseline, and a 6-step PEEK sampler with the fixed schedule `1,1,1,0,0`, also totaling 9 evaluations. It does not run schedule search or repeated evaluations.
+
+The checked-in command file uses the local paper backend and all eight configured GPUs:
+
+```bash
+python /home/yunwei/MultiStroke/auto_runner.py \
+  --commands /home/yunwei/MultiStroke/PEEK/commands_imagenet64_peek_fid5k.txt \
+  --log_dir /home/yunwei/MultiStroke/PEEK/runner_logs_imagenet64_peek_fid5k \
+  --stop_on_error
+```
+
+After completion, the paired FIDs and relative reduction are written to `runs/imagenet64_peek_fid5k/reproduction_summary.json`. The manuscript's full evaluation reports a 49.3 percent relative reduction; this lower-cost run is intended only as a rough single-run reproduction.
+
 ## Schedule search and caches
 
 `peek.greedy_schedule_search` implements the paper protocol. It starts from the all-zero schedule and accepts a nonzero gate only when that candidate strictly improves both the current PEEK schedule and an ordinary sampler with matched denoiser-evaluation cost. The evaluator is application-defined, so it can use FID or another lower-is-better validation metric.
