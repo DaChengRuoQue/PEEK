@@ -21,6 +21,12 @@ diffusers = [
   "Pillow",
   "torch",
 ]
+imagenet = [
+  "numpy",
+  "Pillow",
+  "scipy",
+  "torch",
+]
 
 [tool.setuptools.packages.find]
-include = ["peek*"]
+include = ["peek*", "dnnlib*", "torch_utils*"]

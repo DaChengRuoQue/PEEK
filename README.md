@@ -116,6 +116,14 @@ examples/
 tests/                    deterministic lightweight unit tests
 ```
 
+## Vendored NVIDIA utilities
+
+The repository-local ImageNet evaluator includes the minimal `dnnlib` and
+`torch_utils` modules needed to load NVIDIA EDM and StyleGAN metric pickles.
+These files originate from [NVLabs EDM](https://github.com/NVlabs/edm) and
+retain NVIDIA's Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+copyright and license notices.
+
 ## Validation
 
 Run the lightweight suite with:
