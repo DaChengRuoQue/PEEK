@@ -23,6 +23,14 @@ class SearchEvaluation:
 
 
 @dataclass(frozen=True)
+class BaselineEvaluation:
+    """Metric from one ordinary baseline and its reusable state cache."""
+
+    metric: float
+    cache_state: Any = None
+
+
+@dataclass(frozen=True)
 class CandidateRecord:
     """One nonzero alpha considered at a schedule gate."""
 
@@ -59,7 +67,8 @@ class SearchResult:
 
 
 ScheduleEvaluator = Callable[..., float | SearchEvaluation]
-BaselineEvaluator = Callable[[int], float]
+BaselineEvaluator = Callable[[int], float | BaselineEvaluation]
+BaselineAdvancer = Callable[[Any, int, int], float | BaselineEvaluation]
 PrefixAdvancer = Callable[[Any, int, float], Any]
 
 
@@ -95,12 +104,19 @@ def _evaluate(
     return SearchEvaluation(metric=float(result))
 
 
+def _evaluate_baseline(result: float | BaselineEvaluation) -> BaselineEvaluation:
+    if isinstance(result, BaselineEvaluation):
+        return result
+    return BaselineEvaluation(metric=float(result))
+
+
 def greedy_schedule_search(
     *,
     base_nfe: int,
     candidate_alphas: Sequence[float],
     evaluate_schedule: ScheduleEvaluator,
     evaluate_baseline: BaselineEvaluator,
+    advance_baseline: BaselineAdvancer | None = None,
     initial_prefix: Any = _NO_PREFIX,
     advance_prefix: PrefixAdvancer | None = None,
     short_circuit: bool = True,
@@ -128,15 +144,31 @@ def greedy_schedule_search(
     )
     current_metric = float(initial.metric)
     selected_count = 0
-    baseline_cache: dict[int, float] = {}
+    baseline_cache: dict[int, BaselineEvaluation] = {}
     records: list[SearchRecord] = []
     prefix_state = initial_prefix
 
     for step_index in range(num_peekable):
         compute_matched_nfe = int(base_nfe) + selected_count + 1
         if compute_matched_nfe not in baseline_cache:
-            baseline_cache[compute_matched_nfe] = float(evaluate_baseline(compute_matched_nfe))
-        baseline_metric = baseline_cache[compute_matched_nfe]
+            source_nfe = max(
+                (
+                    nfe
+                    for nfe, evaluation in baseline_cache.items()
+                    if nfe < compute_matched_nfe and evaluation.cache_state is not None
+                ),
+                default=None,
+            )
+            if advance_baseline is not None and source_nfe is not None:
+                source = baseline_cache[source_nfe]
+                baseline_cache[compute_matched_nfe] = _evaluate_baseline(
+                    advance_baseline(source.cache_state, source_nfe, compute_matched_nfe)
+                )
+            else:
+                baseline_cache[compute_matched_nfe] = _evaluate_baseline(
+                    evaluate_baseline(compute_matched_nfe)
+                )
+        baseline_metric = float(baseline_cache[compute_matched_nfe].metric)
         metric_before = current_metric
         best_alpha = 0.0
         best_metric = current_metric
@@ -206,5 +238,8 @@ def greedy_schedule_search(
         selected_count=selected_count,
         actual_nfe=int(base_nfe) + selected_count,
         records=tuple(records),
-        baseline_metrics=tuple(sorted(baseline_cache.items())),
+        baseline_metrics=tuple(
+            (nfe, float(evaluation.metric))
+            for nfe, evaluation in sorted(baseline_cache.items())
+        ),
     )

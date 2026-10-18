@@ -2,10 +2,17 @@
 
 from .cache import NoiseSchedule, rebase_first_order
 from .core import PeekBackend, Prediction, SampleResult, TraceEntry, interpolate, sample
-from .search import SearchEvaluation, SearchRecord, SearchResult, greedy_schedule_search
+from .search import (
+    BaselineEvaluation,
+    SearchEvaluation,
+    SearchRecord,
+    SearchResult,
+    greedy_schedule_search,
+)
 
 __all__ = [
     "NoiseSchedule",
+    "BaselineEvaluation",
     "PeekBackend",
     "Prediction",
     "SampleResult",

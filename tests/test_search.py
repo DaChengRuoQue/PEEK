@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 
+import peek.search as search
 from peek.search import SearchEvaluation, greedy_schedule_search
 
 
@@ -54,6 +55,34 @@ class SearchTests(unittest.TestCase):
 
         self.assertEqual(result.alpha_schedule, (0.0, 0.0))
         self.assertEqual(baseline_calls, [4])
+
+    def test_advances_cached_baseline_when_matched_budget_increases(self) -> None:
+        exact_calls: list[int] = []
+        advance_calls: list[tuple[object, int, int]] = []
+
+        def evaluate(schedule, **_kwargs):
+            return 10.0 - 2.0 * sum(schedule)
+
+        def baseline(nfe: int):
+            exact_calls.append(nfe)
+            return search.BaselineEvaluation(metric=9.0, cache_state="baseline-4")
+
+        def advance(cache_state, source_nfe: int, target_nfe: int):
+            advance_calls.append((cache_state, source_nfe, target_nfe))
+            return search.BaselineEvaluation(metric=7.0, cache_state="baseline-5")
+
+        result = greedy_schedule_search(
+            base_nfe=3,
+            candidate_alphas=[1.0],
+            evaluate_schedule=evaluate,
+            evaluate_baseline=baseline,
+            advance_baseline=advance,
+        )
+
+        self.assertEqual(result.alpha_schedule, (1.0, 1.0))
+        self.assertEqual(exact_calls, [4])
+        self.assertEqual(advance_calls, [("baseline-4", 4, 5)])
+        self.assertEqual(result.baseline_metrics, ((4, 9.0), (5, 7.0)))
 
     def test_prefix_cache_reuses_selected_candidate_state(self) -> None:
         calls: list[tuple[int, object, bool]] = []

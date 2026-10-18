@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 PYTORCH_ALLOC_CONF=expandable_segments:True python -m peek.imagenet64.search --search-images 500 --batch 128 --base-nfe 6 --candidate-alphas 1

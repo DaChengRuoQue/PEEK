@@ -88,11 +88,30 @@ After completion, the paired FIDs and relative reduction are written to `runs/im
 | Ordinary DPM-Solver++ | 19.71 |
 | PEEK | 9.98 |
 
+### ImageNet-64 evaluation with schedule search
+
+This mode uses the same pinned conditional ImageNet-64 EDM checkpoint and first-order DPM-Solver++ sampler. It evaluates every gate against both the current PEEK schedule and the ordinary sampler at matched inference cost.
+
+Launch the checked-in command through the repository runner:
+
+```bash
+python auto_runner.py \
+  --commands commands_imagenet64_peek_schedule_search.txt \
+  --log_dir runner_logs_imagenet64_peek_schedule_search \
+  --stop_on_error
+```
+
+The selected schedule, its PEEK metric, and the matched-baseline metrics are written to `runs/imagenet64_edm_schedule_search/greedy_alpha_schedule.json`. The artifact records both active cache modes so the calibration path is auditable. To inspect the complete configuration without loading the model or launching GPU work, run:
+
+```bash
+python -m peek.imagenet64.search --dry-run
+```
+
 ## Schedule search and caches
 
-`peek.greedy_schedule_search` implements the paper protocol. It starts from the all-zero schedule and accepts a nonzero gate only when that candidate strictly improves both the current PEEK schedule and an ordinary sampler with matched denoiser-evaluation cost. The evaluator is application-defined, so it can use FID or another lower-is-better validation metric.
+`peek.greedy_schedule_search` implements the paper protocol. It starts from the all-zero schedule and accepts a nonzero gate only when that candidate strictly improves both the current PEEK schedule and an ordinary sampler with matched inference cost. The evaluator is application-defined, so it can use FID or another lower-is-better validation metric.
 
-The search memoizes matched-baseline metrics. It also supports a selected-prefix state supplied by the evaluator, allowing later gates to start from the cached noisy prefix rather than rerunning decided steps. `peek.rebase_first_order` provides the framework-neutral operation needed to move an ordinary first-order baseline cache to a new noise level.
+The search actively manages both reuse paths. A selected-prefix state supplied by the evaluator lets later candidates start from the cached noisy prefix rather than rerunning decided steps. A baseline evaluation can return its reusable state through `BaselineEvaluation`; when the matched budget increases, `advance_baseline` advances that state instead of rerunning the ordinary chain. The ImageNet schedule-search evaluator connects this callback to `peek.rebase_first_order`, which moves the cached first-order baseline state to the new noise level before evaluating its final transition.
 
 ## Data and checkpoint prerequisites
 
@@ -110,6 +129,8 @@ peek/
 examples/
   toy.py                       dependency-free smoke example
   imagenet64_edm_fid50k.py    checkpoint-backed paired evaluation
+commands_imagenet64_peek_schedule_search.txt
+                              cached ImageNet schedule-search launch
 scripts/
   prepare_imagenet64_assets.py    pinned asset preparation
 tests/                         deterministic lightweight unit tests
