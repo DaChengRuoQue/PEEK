@@ -4,7 +4,7 @@ PEEK is a training-free correction for diffusion sampling that uses one extra de
 
 This repository is the minimal public implementation accompanying **“PEEK: One-Step-Look-Ahead Exposure Bias Correction for Diffusion Sampling”** by Yunwei Bai, Ying Kiat Tan, and Tsuhan Chen at the National University of Singapore.
 
-Project page: [wendybaiyunwei.github.io/PEEK-Video](https://wendybaiyunwei.github.io/PEEK-Video)
+Project page: [dachengruoque.github.io/PEEK-Video](https://dachengruoque.github.io/PEEK-Video)
 
 ## Installation
 
